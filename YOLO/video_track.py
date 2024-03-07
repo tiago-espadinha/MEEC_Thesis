@@ -1,16 +1,32 @@
+"""
+Author: Tiago Simões
+Date: March 2024
+
+This script performs object tracking using YOLOv8 model.
+
+It captures video from a file, applies YOLOv8 model to detect 
+and track objects in each frame, displays the annotated 
+frames with bounding boxes and track IDs and saves the data in a mat file.
+"""
+
 import cv2
 from ultralytics import YOLO
 from collections import defaultdict
 import numpy as np
+from scipy.io import savemat
 
 # Set the height of the tracking line (0-100% of bounding box)
 track_height = 25
-save_status = False
+save_status = True
 show_status = True
 
 # Capture video from a file
 vid_cap_path = "Viena_30s.mp4"
 vid_cap = cv2.VideoCapture(vid_cap_path)
+
+# Create a dictionary to save the bounding box data
+if save_status:
+    mdic = {"frame": [], "track_id": [], "x": [], "y": [], "w": [], "h": []}
 
 # Save tracking to a file
 if save_status:
@@ -42,6 +58,15 @@ while vid_cap.isOpened():
             for box, track_id in zip(boxes, track_ids):
                 x,y,w,h = box
 
+                # Save the bounding box data and frame number to a dictionary
+                if save_status:
+                    mdic["frame"].append(vid_cap.get(cv2.CAP_PROP_POS_FRAMES))
+                    mdic["track_id"].append(track_id)
+                    mdic["x"].append(x)
+                    mdic["y"].append(y)
+                    mdic["w"].append(w)
+                    mdic["h"].append(h)
+
                 track = track_history[track_id]
                 track.append((float(x), float(y)+(float(h)*(0.5-track_height/100))))
 
@@ -68,4 +93,6 @@ if save_status:
     vid_save.release()
 cv2.destroyAllWindows()
 
-#model.predict(source=video_path, show=True, conf=0.25)
+# Save bounding box data in a mat file
+if save_status:
+    savemat("Viena_Tracker_Full" + str(track_height) + ".mat", mdic)

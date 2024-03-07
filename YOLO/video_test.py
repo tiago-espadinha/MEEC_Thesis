@@ -1,3 +1,14 @@
+"""
+Author: Tiago Simões
+Date: March 2024
+
+This script performs object detection using YOLOv8 model.
+
+It captures video from a file, applies YOLOv8 model to detect 
+objects in each frame, and displays the annotated 
+frames with bounding boxes and track IDs.
+"""
+
 import cv2
 from ultralytics import YOLO
 
@@ -22,5 +33,3 @@ while cap.isOpened():
 
 cap.release()
 cv2.destroyAllWindows()
-
-#model.predict(source=video_path, show=True, conf=0.25)
